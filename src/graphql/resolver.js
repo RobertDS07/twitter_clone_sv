@@ -1,8 +1,10 @@
-const User = require('../models/User')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 
-const config = require('../config/authSecret')
+const config = require('../config/config')
+
+const User = require('../models/User')
+const Post = require('../models/Post')
 
 const resolvers = {
     hello: User.find(),
@@ -33,6 +35,24 @@ const resolvers = {
                 expiresIn: 604800
             })
         } return 401
+    },
+
+    createPost: async (args) => {
+        const { authorID, author, content} = args
+
+        const id = jwt.verify(authorID, config.secret, (err, decoded) => {
+            if(err) return null 
+
+            return decoded.id
+        })
+
+        const newPost = {
+            authorID: id,
+            author,
+            content
+        }
+
+        return await Post.create(newPost)
     }
 }
 

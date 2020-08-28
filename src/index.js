@@ -7,7 +7,9 @@ const { graphqlHTTP } = require('express-graphql')
 const resolvers = require('./graphql/resolver')
 const schema = require('./graphql/schema.gql')
 
-mongoose.connect('mongodb://localhost:27017/zwitter', {
+const config = require('./config/config')
+
+mongoose.connect(config.db, {
     useCreateIndex: true,
     useNewUrlParser: true,
     useUnifiedTopology: true
@@ -22,4 +24,4 @@ app.use('/graphql', graphqlHTTP({
 }))
 
 
-server.listen(process.env.PORT || 8081, () => console.log('sv on port 8081'))
+server.listen(config.port, () => console.log('sv on port 8081'))
