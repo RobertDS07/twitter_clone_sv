@@ -2,8 +2,7 @@ const { buildSchema } = require('graphql')
 
 const schema = buildSchema(`
     type Query {
-        hello: [User!]
-        # posts
+        posts(token:String!): [Post!]
     }
 
     type Mutation {
