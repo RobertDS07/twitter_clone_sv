@@ -2,14 +2,14 @@ const { buildSchema } = require('graphql')
 
 const schema = buildSchema(`
     type Query {
-        posts(token:String!): [Post!]
+        posts(token:String!): [Post]
     }
 
     type Mutation {
         createUser(name:String!, email:String!, password:String!):String!
         login(email:String!, password:String!):String
-        createPost(authorID:ID!, author:String!, content:String!): Post!
-        # deletePost
+        createPost(token:ID!, author:String!, content:String!): Post!
+        deletePost(_id:ID!):Post!
         # updatePost
     }
 
@@ -21,10 +21,12 @@ const schema = buildSchema(`
     }
 
     type Post {
-        authorID: ID!
-        author: String!
-        content: String!
+        _id: ID!
+        token: ID
+        author: String
+        content: String
         likes: Int
+        mutable: Boolean
     }
 `)
 

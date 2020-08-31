@@ -6,21 +6,31 @@ const config = require('../config/config')
 const User = require('../models/User')
 const Post = require('../models/Post')
 
-function verifyAuth(token) {
-    jwt.verify(token, config.secret, (err, decoded) => {
-        if (err) return false
-
-        return true
-    })
-}
-
 const resolvers = {
-    posts: (args) => {
+
+    posts: async (args) => {
         const { token } = args
+        let idUser = null
 
-        verifyAuth(token)
+        const authorization = jwt.verify(token, config.secret, (err, decoded) => {
+            if (err) return false
 
-        return Post.find()
+            idUser = decoded.id
+
+            return true
+        })
+
+        const posts = await Post.find()
+
+        posts.forEach(post => {
+            if (post.authorID === idUser) {
+                post.mutable = true
+            }
+        })
+
+        if (authorization) {
+            return posts
+        } return 401
     },
 
     createUser: async (args) => {
@@ -67,6 +77,13 @@ const resolvers = {
         }
 
         return await Post.create(newPost)
+    },
+
+    deletePost: async(args) => {
+        const { _id } = args
+
+        return await Post.findByIdAndDelete({_id})
+
     }
 }
 
