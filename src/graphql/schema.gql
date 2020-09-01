@@ -8,8 +8,8 @@ const schema = buildSchema(`
 
     type Mutation {
         createUser(name:String!, email:String!, password:String!):String!
-        createPost(token:ID!, author:String!, content:String!): Post!
-        deletePost(_id:ID!):Post!
+        createPost(token:ID!, content:String!): Int
+        deletePost(_id:ID!): Int
         # updatePost
     }
 

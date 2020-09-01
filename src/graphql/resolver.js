@@ -62,28 +62,33 @@ const resolvers = {
     },
 
     createPost: async (args) => {
-        const { authorID, author, content } = args
+        const { token, content } = args
 
-        const id = jwt.verify(authorID, config.secret, (err, decoded) => {
+        const id = jwt.verify(token, config.secret, (err, decoded) => {
             if (err) return null
 
             return decoded.id
         })
 
+        const {name} = await User.findById({_id: id})
+
         const newPost = {
             authorID: id,
-            author,
+            author: name,
             content
         }
 
-        return await Post.create(newPost)
+        await Post.create(newPost)
+
+        return 200
     },
 
     deletePost: async(args) => {
         const { _id } = args
 
-        return await Post.findByIdAndDelete({_id})
+        await Post.findByIdAndDelete({_id})
 
+        return 200
     }
 }
 
