@@ -8,9 +8,8 @@ const Post = require('../models/Post')
 
 const resolvers = {
 
-    posts: async (args) => {
-        const { token } = args
-        let idUser = null
+    posts: async ({ token }) => {
+        let idUser = undefined
 
         const authorization = jwt.verify(token, config.secret, (err, decoded) => {
             if (err) return false
@@ -30,11 +29,16 @@ const resolvers = {
 
         if (authorization) {
             return posts
-        } return 401
+        } return new Error('Algo de errado ocorreu')
     },
 
-    createUser: async (args) => {
-        const { name, email, password } = args
+    createUser: async ({ name, email, password }) => {
+
+        const sameEmailAsAnotherUser = await User.findOne({email})
+
+        if(!!sameEmailAsAnotherUser) return new Error('Este email já esta cadastrado no nosso banco de dados')
+
+        if(password.length < 5) return new Error('Senha deve conter 5 caracteres ou mais')
 
         const newUser = {
             name,
@@ -49,26 +53,24 @@ const resolvers = {
         })
     },
 
-    login: async (args) => {
-        const { email, password } = args
-
+    login: async ({ email, password }) => {
         const user = await User.findOne({ email }).select('+password')
 
         if (!!user && await bcrypt.compare(password, user.password)) {
             return jwt.sign({ id: user._id }, config.secret, {
                 expiresIn: 604800
             })
-        } return 401
+        } return new Error('As credencias não foram encontradas nos nossos registros')
     },
 
-    createPost: async (args) => {
-        const { token, content } = args
-
+    createPost: async ({ token, content }) => {
         const id = jwt.verify(token, config.secret, (err, decoded) => {
-            if (err) return null
+            if (err) return false
 
             return decoded.id
         })
+
+        if(!id) return new Error('Algo de errado ocorreu, tente novamente')
 
         const {name} = await User.findById({_id: id})
 
@@ -83,9 +85,7 @@ const resolvers = {
         return 200
     },
 
-    deletePost: async(args) => {
-        const { _id } = args
-
+    deletePost: async({ _id }) => {
         await Post.findByIdAndDelete({_id})
 
         return 200
