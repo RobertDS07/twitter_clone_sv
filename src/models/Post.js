@@ -14,7 +14,7 @@ const PostSchema = mongoose.Schema({
         required: true
     },
     likes: {
-        type: String
+        type: [String]
     },
     mutable: {
         type: Boolean,

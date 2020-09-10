@@ -34,11 +34,11 @@ const resolvers = {
 
     createUser: async ({ name, email, password }) => {
 
-        const sameEmailAsAnotherUser = await User.findOne({email})
+        const sameEmailAsAnotherUser = await User.findOne({ email })
 
-        if(!!sameEmailAsAnotherUser) return new Error('Este email já esta cadastrado no nosso banco de dados')
+        if (!!sameEmailAsAnotherUser) return new Error('Este email já esta cadastrado no nosso banco de dados')
 
-        if(password.length < 5) return new Error('Senha deve conter 5 caracteres ou mais')
+        if (password.length < 5) return new Error('Senha deve conter 5 caracteres ou mais')
 
         const newUser = {
             name,
@@ -70,9 +70,9 @@ const resolvers = {
             return decoded.id
         })
 
-        if(!id) return new Error('Algo de errado ocorreu, tente novamente')
+        if (!id) return new Error('Algo de errado ocorreu, tente novamente')
 
-        const {name} = await User.findById({_id: id})
+        const { name } = await User.findById({ _id: id })
 
         const newPost = {
             authorID: id,
@@ -85,8 +85,33 @@ const resolvers = {
         return 200
     },
 
-    deletePost: async({ _id }) => {
-        await Post.findByIdAndDelete({_id})
+    deletePost: async ({ _id }) => {
+        await Post.findByIdAndDelete({ _id })
+
+        return 200
+    },
+
+    likedPost: async ({ _id, userToken }) => {
+        const userId = jwt.verify(userToken, config.secret, (err, decoded) => {
+            if (err) return false
+
+            return decoded.id
+        })
+
+        if (!userId) return new Error('Parece que há algo de errado com suas credencias, logue novamente')
+
+        const thisPost = await Post.findOne({ _id })
+
+        const alreadyLiked = thisPost.likes.find(e => e === userId)
+
+        if (!!alreadyLiked) {
+            thisPost.likes.forEach((e, index, array) => {
+                if (e === userId) array.splice(index, 1)
+            })
+            await Post.findOneAndUpdate({_id}, {likes : thisPost.likes})
+        } else {
+            await Post.findOneAndUpdate({ _id }, { likes: [...thisPost.likes, userId] })
+        }
 
         return 200
     }

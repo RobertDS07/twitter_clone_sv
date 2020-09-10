@@ -8,9 +8,9 @@ const schema = buildSchema(`
 
     type Mutation {
         createUser(name:String!, email:String!, password:String!):String!
-        createPost(token:ID!, content:String!): Int!
-        deletePost(_id:ID!): Int!
-        # updatePost
+        createPost(token:ID!, content:String!): String
+        deletePost(_id:ID!): String
+        likedPost(_id:ID!, userToken: ID!) : String
     }
 
     type User {
@@ -22,12 +22,13 @@ const schema = buildSchema(`
 
     type Post {
         _id: ID
-        token: ID
+        authorID: ID
         author: String
         content: String
         likes: String
         mutable: Boolean
     }
+
 `)
 
 module.exports = schema
