@@ -27,5 +27,4 @@ app.use('/graphql', graphqlHTTP({
     graphiql: true
 }))
 
-
 server.listen(config.port, () => console.log('sv on port 8081'))
