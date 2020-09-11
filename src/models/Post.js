@@ -1,5 +1,24 @@
 const mongoose = require('mongoose')
 
+const comment = mongoose.Schema({
+    authorID: {
+        type: String,
+        required: true
+    },
+    author: {
+        type: String,
+        required: true
+    },
+    content: {
+        type: String,
+        required: true
+    },
+    mutable: {
+        type: Boolean,
+        default: false
+    }
+})
+
 const PostSchema = mongoose.Schema({
     authorID: {
         type: String,
@@ -14,7 +33,12 @@ const PostSchema = mongoose.Schema({
         required: true
     },
     likes: {
-        type: [String]
+        type: [String],
+        default: []
+    },
+    comments: {
+        type: [comment],
+        default: []
     },
     mutable: {
         type: Boolean,

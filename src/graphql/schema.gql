@@ -11,6 +11,7 @@ const schema = buildSchema(`
         createPost(token:ID!, content:String!): String
         deletePost(_id:ID!): String
         likedPost(_id:ID!, userToken: ID!) : String
+        createComment(token:ID!, content:String!, postId: ID!) : Comment
     }
 
     type User {
@@ -25,10 +26,17 @@ const schema = buildSchema(`
         authorID: ID
         author: String
         content: String
-        likes: String
+        likes: [String]
         mutable: Boolean
+        comments: [Comment]
     }
 
+    type Comment {
+        authorID: ID
+        author: String
+        content: String
+        mutable: Boolean
+    }
 `)
 
 module.exports = schema

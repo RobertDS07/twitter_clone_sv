@@ -25,6 +25,9 @@ const resolvers = {
             if (post.authorID === idUser) {
                 post.mutable = true
             }
+            post.comments.forEach(comment => {
+                if (comment.authorID === idUser) return comment.mutable = true
+            })
         })
 
         if (authorization) {
@@ -64,6 +67,8 @@ const resolvers = {
     },
 
     createPost: async ({ token, content }) => {
+        if(content.length === 0) return new Error('Deve haver conteudo')
+
         const id = jwt.verify(token, config.secret, (err, decoded) => {
             if (err) return false
 
@@ -104,16 +109,44 @@ const resolvers = {
 
         const alreadyLiked = thisPost.likes.find(e => e === userId)
 
+        let newLikes = undefined
+
         if (!!alreadyLiked) {
             thisPost.likes.forEach((e, index, array) => {
                 if (e === userId) array.splice(index, 1)
             })
-            await Post.findOneAndUpdate({_id}, {likes : thisPost.likes})
+            newLikes = await Post.findOneAndUpdate({ _id }, { likes: thisPost.likes }, { new: true })
         } else {
-            await Post.findOneAndUpdate({ _id }, { likes: [...thisPost.likes, userId] })
+            newLikes = await Post.findOneAndUpdate({ _id }, { likes: [...thisPost.likes, userId] }, { new: true })
         }
 
-        return 200
+        return newLikes.likes.length
+    },
+
+    createComment: async({token, content, postId}) => {
+        if(content.length === 0) return new Error('Deve haver conteudo')
+
+        const userId = jwt.verify(token, config.secret, (err, decoded) => {
+            if (err) return false
+
+            return decoded.id
+        })
+
+        if (!userId) return new Error('Ocorreu algo de errado, tente novamente')
+
+        const {name} = await User.findOne({_id:userId})
+
+        const {comments} = await Post.findOne({_id:postId})
+
+        const newComment = {
+            authorID: userId,
+            author: name,
+            content,
+        }
+
+        await Post.findOneAndUpdate({_id:postId}, {comments: [...comments, newComment]}, {new: true})
+
+        return {...newComment, mutable: true}
     }
 }
 
