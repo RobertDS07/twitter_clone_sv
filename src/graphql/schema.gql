@@ -12,6 +12,7 @@ const schema = buildSchema(`
         deletePost(_id:ID!): String
         likedPost(_id:ID!, userToken: ID!) : String
         createComment(token:ID!, content:String!, postId: ID!) : Comment
+        deleteComment(_id: ID!, postId: ID!): String
     }
 
     type User {
@@ -32,6 +33,7 @@ const schema = buildSchema(`
     }
 
     type Comment {
+        _id: ID
         authorID: ID
         author: String
         content: String

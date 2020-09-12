@@ -19,6 +19,8 @@ const resolvers = {
             return true
         })
 
+        if(!authorization) return new Error('Algo de errado ocorreu')
+
         const posts = await Post.find()
 
         posts.forEach(post => {
@@ -30,9 +32,7 @@ const resolvers = {
             })
         })
 
-        if (authorization) {
-            return posts
-        } return new Error('Algo de errado ocorreu')
+        return posts
     },
 
     createUser: async ({ name, email, password }) => {
@@ -147,6 +147,12 @@ const resolvers = {
         await Post.findOneAndUpdate({_id:postId}, {comments: [...comments, newComment]}, {new: true})
 
         return {...newComment, mutable: true}
+    },
+
+    deleteComment: async ({_id, postId}) => {
+        await Post.findOneAndUpdate({_id: postId}, { $pull: {'comments' : {_id}}})
+
+        return 'ok'
     }
 }
 
